@@ -1,0 +1,228 @@
+<div class="addresses-page">
+  <div class="container">
+    <div class="page-header">
+      <div class="header-left">
+        <a routerLink="/account" class="back-link">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Back
+        </a>
+        <h1>My Addresses</h1>
+      </div>
+      <button class="btn btn-primary" (click)="openAddForm()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
+        </svg>
+        Add Address
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <app-loading [center]="true" message="Loading addresses..." />
+    } @else if (addresses().length === 0 && !showForm) {
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <h2>No addresses saved</h2>
+        <p>Add a delivery address for faster checkout.</p>
+        <button class="btn btn-primary" (click)="openAddForm()">Add Your First Address</button>
+      </div>
+    } @else {
+      <div class="content-layout">
+        <!-- Address List -->
+        <div class="addresses-list">
+          @for (address of addresses(); track address._id) {
+            <div class="address-card" [class.default]="address.isDefault">
+              <div class="address-header">
+                <span class="address-label">{{ address.label }}</span>
+                @if (address.isDefault) {
+                  <span class="default-badge">Default</span>
+                }
+              </div>
+              <div class="address-body">
+                <p>{{ address.building }}, {{ address.street }}</p>
+                <p>{{ address.area }}, {{ address.city }}</p>
+                @if (address.notes) {
+                  <p class="notes">{{ address.notes }}</p>
+                }
+              </div>
+              <div class="address-actions">
+                @if (!address.isDefault) {
+                  <button class="btn btn-sm btn-outline" (click)="setDefault(address._id)">
+                    Set as Default
+                  </button>
+                }
+                <button class="btn btn-sm btn-ghost" (click)="editAddress(address)">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-danger-ghost" (click)="confirmDelete(address)">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Add/Edit Form -->
+        @if (showForm) {
+          <div class="address-form-container">
+            <div class="form-header">
+              <h2>{{ editingAddress ? 'Edit Address' : 'Add New Address' }}</h2>
+              <button class="btn-close" (click)="closeForm()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+            <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+              <div class="form-group">
+                <label>Address Label</label>
+                <select formControlName="label">
+                  <option value="Home">Home</option>
+                  <option value="Office">Office</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>City *</label>
+                  <input type="text" formControlName="city" placeholder="City" />
+                </div>
+                <div class="form-group">
+                  <label>Area *</label>
+                  <input type="text" formControlName="area" placeholder="Area/District" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Street *</label>
+                <input type="text" formControlName="street" placeholder="Street name" />
+              </div>
+              <div class="form-group">
+                <label>Building *</label>
+                <input
+                  type="text"
+                  formControlName="building"
+                  placeholder="Building name/number, apartment"
+                />
+              </div>
+              <div class="form-group">
+                <label>Delivery Notes</label>
+                <textarea
+                  formControlName="notes"
+                  placeholder="Any special delivery instructions"
+                ></textarea>
+              </div>
+              <div class="form-group checkbox">
+                <label>
+                  <input type="checkbox" formControlName="isDefault" />
+                  Set as default address
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-outline" (click)="closeForm()">Cancel</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isSaving() || addressForm.invalid"
+                >
+                  @if (isSaving()) {
+                    Saving...
+                  } @else {
+                    {{ editingAddress ? 'Update Address' : 'Add Address' }}
+                  }
+                </button>
+              </div>
+            </form>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+@if (showDeleteModal) {
+  <app-confirm-modal
+    [isOpen]="true"
+    title="Delete Address"
+    message="Are you sure you want to delete this address? This action cannot be undone."
+    confirmText="Delete"
+    variant="danger"
+    (confirm)="deleteAddress()"
+    (cancel)="showDeleteModal = false"
+  />
+}

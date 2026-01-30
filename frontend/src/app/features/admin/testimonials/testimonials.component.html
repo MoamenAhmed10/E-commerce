@@ -1,0 +1,145 @@
+<div class="admin-testimonials">
+  <div class="page-header">
+    <h1>Testimonials</h1>
+    <p class="page-description">Manage customer testimonials that appear on the homepage</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <select [(ngModel)]="statusFilter" (change)="onSearch()">
+        <option value="">All Testimonials</option>
+        <option value="pending">Pending Approval</option>
+        <option value="approved">Approved</option>
+      </select>
+    </div>
+    <div class="search-group">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Search by name or content..."
+        (keyup.enter)="onSearch()"
+      />
+      <button class="btn btn-primary btn-sm" (click)="onSearch()">Search</button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading testimonials..." />
+  } @else if (testimonials().length === 0) {
+    <div class="empty-state">
+      <p>No testimonials found.</p>
+    </div>
+  } @else {
+    <div class="testimonials-list">
+      @for (testimonial of testimonials(); track testimonial._id) {
+        <div class="testimonial-card" [class.pending]="!testimonial.isApproved">
+          <div class="testimonial-header">
+            <div class="user-info">
+              <div class="avatar">{{ testimonial.userName.charAt(0).toUpperCase() }}</div>
+              <div class="user-details">
+                <span class="user-name">{{ getUserName(testimonial) }}</span>
+                @if (getUserEmail(testimonial)) {
+                  <span class="user-email">{{ getUserEmail(testimonial) }}</span>
+                }
+                <span class="testimonial-date">{{
+                  testimonial.createdAt | date: 'mediumDate'
+                }}</span>
+              </div>
+            </div>
+            <div class="rating">
+              @for (star of getStars(testimonial.rating); track $index) {
+                <span class="star" [class.filled]="star === 1">★</span>
+              }
+            </div>
+          </div>
+
+          <h4 class="testimonial-title">{{ testimonial.title }}</h4>
+          <p class="testimonial-content">{{ testimonial.content }}</p>
+
+          <div class="testimonial-actions">
+            @if (!testimonial.isApproved) {
+              <button class="btn btn-sm btn-success" (click)="toggleApproval(testimonial)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Approve
+              </button>
+            } @else {
+              <button class="btn btn-sm btn-warning" (click)="toggleApproval(testimonial)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                Unapprove
+              </button>
+            }
+            <button class="btn btn-sm btn-danger" (click)="confirmDelete(testimonial)">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+              Delete
+            </button>
+
+            <span class="status-badge" [class.approved]="testimonial.isApproved">
+              {{ testimonial.isApproved ? 'Approved' : 'Pending' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (pagination()) {
+      <app-pagination
+        [currentPage]="pagination()!.page"
+        [totalPages]="pagination()!.totalPages"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</div>
+
+@if (showDeleteModal && testimonialToDelete) {
+  <app-confirm-modal
+    [isOpen]="true"
+    title="Delete Testimonial"
+    message="Are you sure you want to delete this testimonial? This action cannot be undone."
+    confirmText="Delete"
+    variant="danger"
+    (confirm)="deleteTestimonial()"
+    (cancel)="cancelDelete()"
+  />
+}

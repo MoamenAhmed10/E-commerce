@@ -1,0 +1,22 @@
+<!-- Toast notifications -->
+<app-toast />
+
+<!-- Admin Sidebar (shown in admin routes) -->
+@if (isAdminRoute()) {
+  <app-admin-sidebar />
+}
+
+<!-- Navbar (hidden in admin routes) -->
+@if (!isAdminRoute()) {
+  <app-navbar />
+}
+
+<!-- Main content -->
+<main class="main-content" [class.admin-layout]="isAdminRoute()">
+  <router-outlet />
+</main>
+
+<!-- Footer (hidden in admin routes) -->
+@if (!isAdminRoute()) {
+  <app-footer />
+}

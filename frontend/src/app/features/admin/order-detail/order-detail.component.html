@@ -1,0 +1,157 @@
+<div class="admin-order-detail">
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading order..." />
+  } @else if (!order()) {
+    <div class="error-state">
+      <h2>Order not found</h2>
+      <a routerLink="/admin/orders" class="btn btn-primary">Back to Orders</a>
+    </div>
+  } @else {
+    <div class="page-header">
+      <div class="header-left">
+        <a routerLink="/admin/orders" class="back-link">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Back to Orders
+        </a>
+        <h1>Order #{{ order()!.orderNumber }}</h1>
+        <p class="order-date">Placed on {{ order()!.createdAt | date: 'fullDate' }}</p>
+      </div>
+      <div class="header-actions">
+        <select
+          class="status-select"
+          [class]="order()!.status"
+          [value]="order()!.status"
+          (change)="updateStatus($event)"
+          [disabled]="['received', 'refused', 'cancelled'].includes(order()!.status)"
+        >
+          <option value="pending">Pending</option>
+          <option value="preparing">Preparing</option>
+          <option value="ready">Ready</option>
+          <option value="shipped">Shipped</option>
+          <option value="received">Received</option>
+          <option value="refused">Refused</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="order-layout">
+      <!-- Order Items -->
+      <div class="order-section items-section">
+        <h2>Order Items</h2>
+        <div class="order-items">
+          @for (item of order()!.items; track item.productId) {
+            <div class="order-item">
+              <img
+                [src]="item.productImage || '/assets/images/placeholder.jpg'"
+                [alt]="item.productName"
+              />
+              <div class="item-info">
+                <span class="item-name">{{ item.productName }}</span>
+                <p class="item-meta">{{ item.price | currency }} × {{ item.quantity }}</p>
+              </div>
+              <span class="item-total">{{ item.total | currency }}</span>
+            </div>
+          }
+        </div>
+        <div class="order-totals">
+          <div class="total-row">
+            <span>Subtotal ({{ order()!.totalItems }} items)</span>
+            <span>{{ order()!.subtotal | currency }}</span>
+          </div>
+          <div class="total-row">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Total</span>
+            <span>{{ order()!.subtotal | currency }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="order-sidebar">
+        <!-- Customer Info -->
+        <div class="order-section">
+          <h2>Customer</h2>
+          <div class="customer-info">
+            <p>
+              <strong>{{ order()!.customerSnapshot.name }}</strong>
+            </p>
+            @if (order()!.customerSnapshot.email) {
+              <p>
+                <a [href]="'mailto:' + order()!.customerSnapshot.email">{{
+                  order()!.customerSnapshot.email
+                }}</a>
+              </p>
+            }
+            @if (order()!.customerSnapshot.mobile) {
+              <p>
+                <a [href]="'tel:' + order()!.customerSnapshot.mobile">{{
+                  order()!.customerSnapshot.mobile
+                }}</a>
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="order-section">
+          <h2>Delivery Address</h2>
+          <div class="address-info">
+            @if (order()!.addressSnapshot.label) {
+              <p class="label">{{ order()!.addressSnapshot.label }}</p>
+            }
+            <p>{{ order()!.addressSnapshot.building }}, {{ order()!.addressSnapshot.street }}</p>
+            <p>{{ order()!.addressSnapshot.area }}, {{ order()!.addressSnapshot.city }}</p>
+            @if (order()!.addressSnapshot.notes) {
+              <p class="notes">{{ order()!.addressSnapshot.notes }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Order Notes -->
+        @if (order()!.notes) {
+          <div class="order-section">
+            <h2>Order Notes</h2>
+            <p class="order-notes">{{ order()!.notes }}</p>
+          </div>
+        }
+
+        <!-- Actions -->
+        @if (!['received', 'refused', 'cancelled'].includes(order()!.status)) {
+          <div class="order-actions">
+            <button class="btn btn-danger btn-block" (click)="showCancelModal = true">
+              Cancel Order
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@if (showCancelModal) {
+  <app-confirm-modal
+    [isOpen]="true"
+    title="Cancel Order"
+    message="Are you sure you want to cancel this order?"
+    confirmText="Yes, Cancel Order"
+    variant="danger"
+    (confirm)="cancelOrder()"
+    (cancel)="showCancelModal = false"
+  />
+}

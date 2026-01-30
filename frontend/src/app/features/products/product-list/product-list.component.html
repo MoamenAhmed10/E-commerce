@@ -1,0 +1,273 @@
+<div class="product-list-page">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="isFilterOpen()">
+    <div class="sidebar-header">
+      <h3>Filters</h3>
+      <button class="close-filters" (click)="toggleFilters()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="filter-section">
+      <h4>Categories</h4>
+      <ul class="filter-list">
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="category"
+              [value]="''"
+              [checked]="!selectedCategory()"
+              (change)="onCategoryChange('')"
+            />
+            <span>All Categories</span>
+          </label>
+        </li>
+        @for (category of categories(); track category._id) {
+          <li>
+            <label class="filter-item">
+              <input
+                type="radio"
+                name="category"
+                [value]="category.slug"
+                [checked]="selectedCategory() === category.slug"
+                (change)="onCategoryChange(category.slug)"
+              />
+              <span>{{ category.name }}</span>
+            </label>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Subcategories -->
+    <div class="filter-section">
+      <h4>Subcategory</h4>
+      <ul class="filter-list">
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="subcategory"
+              [value]="''"
+              [checked]="!selectedSubcategory()"
+              (change)="onSubcategoryChange('')"
+            />
+            <span>All</span>
+          </label>
+        </li>
+        @for (subcategory of subcategories(); track subcategory._id) {
+          <li>
+            <label class="filter-item">
+              <input
+                type="radio"
+                name="subcategory"
+                [value]="subcategory.slug"
+                [checked]="selectedSubcategory() === subcategory.slug"
+                (change)="onSubcategoryChange(subcategory.slug)"
+              />
+              <span>{{ subcategory.name }}</span>
+            </label>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Price Range -->
+    <div class="filter-section">
+      <h4>Price Range</h4>
+      <div class="price-inputs">
+        <input type="number" placeholder="Min" [(ngModel)]="minPrice" (change)="applyFilters()" />
+        <span>-</span>
+        <input type="number" placeholder="Max" [(ngModel)]="maxPrice" (change)="applyFilters()" />
+      </div>
+    </div>
+
+    <!-- In Stock Only -->
+    <div class="filter-section">
+      <label class="filter-item checkbox">
+        <input type="checkbox" [(ngModel)]="inStockOnly" (change)="applyFilters()" />
+        <span>In Stock Only</span>
+      </label>
+    </div>
+
+    <!-- Rating Filter -->
+    <div class="filter-section">
+      <h4>Rating</h4>
+      <ul class="filter-list">
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="rating"
+              [value]="null"
+              [checked]="!minRating"
+              (change)="onRatingChange(0)"
+            />
+            <span>All Ratings</span>
+          </label>
+        </li>
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="rating"
+              [value]="4"
+              [checked]="minRating === 4"
+              (change)="onRatingChange(4)"
+            />
+            <span class="rating-label"> <span class="stars">★★★★☆</span> 4 & Up </span>
+          </label>
+        </li>
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="rating"
+              [value]="3"
+              [checked]="minRating === 3"
+              (change)="onRatingChange(3)"
+            />
+            <span class="rating-label"> <span class="stars">★★★☆☆</span> 3 & Up </span>
+          </label>
+        </li>
+        <li>
+          <label class="filter-item">
+            <input
+              type="radio"
+              name="rating"
+              [value]="2"
+              [checked]="minRating === 2"
+              (change)="onRatingChange(2)"
+            />
+            <span class="rating-label"> <span class="stars">★★☆☆☆</span> 2 & Up </span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary btn-block" (click)="clearFilters()">Clear All Filters</button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <div class="content-header">
+      <div class="header-info">
+        <h1>{{ pageTitle() }}</h1>
+        <span class="product-count">{{ totalProducts() }} products</span>
+      </div>
+
+      <div class="header-actions">
+        <button class="filter-toggle" (click)="toggleFilters()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filters
+        </button>
+
+        <select [(ngModel)]="sortBy" (change)="applyFilters()" class="sort-select">
+          <option value="newest">Newest First</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-high">Rating: High to Low</option>
+          <option value="name-asc">Name: A to Z</option>
+          <option value="name-desc">Name: Z to A</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Filters -->
+    @if (hasActiveFilters()) {
+      <div class="active-filters">
+        @if (selectedCategory()) {
+          <span class="filter-tag">
+            Category: {{ selectedCategory() }}
+            <button (click)="onCategoryChange('')">×</button>
+          </span>
+        }
+        @if (selectedSubcategory()) {
+          <span class="filter-tag">
+            Subcategory: {{ selectedSubcategory() }}
+            <button (click)="onSubcategoryChange('')">×</button>
+          </span>
+        }
+        @if (minPrice || maxPrice) {
+          <span class="filter-tag">
+            Price: {{ minPrice || 0 }} - {{ maxPrice || '∞' }}
+            <button (click)="clearPriceFilter()">×</button>
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Products Grid -->
+    @if (isLoading()) {
+      <app-loading [center]="true" message="Loading products..." />
+    } @else if (products().length === 0) {
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or search criteria</p>
+        <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+      </div>
+    } @else {
+      <div class="products-grid">
+        @for (product of products(); track product._id) {
+          <app-product-card [product]="product" (addToCart)="onAddToCart($event)" />
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (pagination()) {
+        <app-pagination
+          [currentPage]="pagination()!.page"
+          [totalPages]="pagination()!.totalPages"
+          (pageChange)="onPageChange($event)"
+        />
+      }
+    }
+  </main>
+</div>
+
+<!-- Mobile Filter Overlay -->
+@if (isFilterOpen()) {
+  <div class="filter-overlay" (click)="toggleFilters()"></div>
+}

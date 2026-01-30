@@ -1,0 +1,17 @@
+@if (overlay) {
+  <div class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner" [style.width.px]="size" [style.height.px]="size"></div>
+      @if (message) {
+        <p class="loading-message">{{ message }}</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="loading-inline" [class.center]="center">
+    <div class="spinner" [style.width.px]="size" [style.height.px]="size"></div>
+    @if (message) {
+      <p class="loading-message">{{ message }}</p>
+    }
+  </div>
+}

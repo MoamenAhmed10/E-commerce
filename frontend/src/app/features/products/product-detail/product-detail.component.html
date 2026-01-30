@@ -1,0 +1,194 @@
+@if (isLoading()) {
+  <app-loading [overlay]="true" message="Loading product..." />
+}
+
+@if (product()) {
+  <div class="product-detail-page">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a routerLink="/">Home</a>
+        <span>/</span>
+        <a routerLink="/products">Products</a>
+        <span>/</span>
+        <span>{{ product()!.name }}</span>
+      </nav>
+
+      <div class="product-layout">
+        <!-- Image Gallery -->
+        <div class="product-gallery">
+          <div class="main-image">
+            <img [src]="selectedImage()" [alt]="product()!.name" />
+            @if (!product()!.inStock) {
+              <div class="out-of-stock-badge">Out of Stock</div>
+            }
+          </div>
+          @if (product()!.images.length > 1) {
+            <div class="thumbnail-list">
+              @for (image of product()!.images; track image; let i = $index) {
+                <button
+                  class="thumbnail"
+                  [class.active]="selectedImageIndex() === i"
+                  (click)="selectImage(i)"
+                >
+                  <img [src]="image" [alt]="product()!.name" />
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <div class="product-header">
+            <h1 class="product-name">{{ product()!.name }}</h1>
+            <div class="product-meta">
+              @if (product()!.isBestSeller) {
+                <span class="badge bestseller">Best Seller</span>
+              }
+              @if (product()!.isNewArrival) {
+                <span class="badge new">New Arrival</span>
+              }
+            </div>
+          </div>
+
+          <div class="product-price">
+            @if (product()!.isOnSale && product()!.originalPrice) {
+              <span class="original-price">{{ product()!.originalPrice | currency }}</span>
+              <span class="sale-price">{{ product()!.price | currency }}</span>
+              <span class="discount-badge">-{{ product()!.discountPercentage }}%</span>
+            } @else {
+              <span class="price">{{ product()!.price | currency }}</span>
+            }
+          </div>
+
+          <p class="product-description">{{ product()!.description }}</p>
+
+          <!-- Stock Status -->
+          <div class="stock-status" [class]="product()!.stockStatus">
+            @switch (product()!.stockStatus) {
+              @case ('in_stock') {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>In Stock</span>
+              }
+              @case ('low_stock') {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  ></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>Only {{ product()!.displayStock }} left!</span>
+              }
+              @case ('out_of_stock') {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span>Out of Stock</span>
+              }
+            }
+          </div>
+
+          <!-- Quantity -->
+          <div class="quantity-section">
+            <label>Quantity</label>
+            <div class="quantity-selector">
+              <button (click)="decreaseQuantity()" [disabled]="quantity() <= 1">−</button>
+              <span>{{ quantity() }}</span>
+              <button (click)="increaseQuantity()" [disabled]="quantity() >= maxQuantity()">
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Add to Cart -->
+          <div class="product-actions">
+            <button
+              class="btn btn-primary btn-lg btn-block"
+              [disabled]="!product()!.inStock || isAddingToCart()"
+              (click)="addToCart()"
+            >
+              @if (isAddingToCart()) {
+                <span class="spinner"></span>
+                Adding to Cart...
+              } @else {
+                Add to Cart - {{ product()!.price * quantity() | currency }}
+              }
+            </button>
+          </div>
+
+          <!-- Product Details -->
+          <div class="product-details">
+            <h3>Product Details</h3>
+            <ul>
+              <li><strong>Category:</strong> {{ getCategoryName() }}</li>
+              <li><strong>Gender:</strong> {{ product()!.gender | titlecase }}</li>
+              <li><strong>SKU:</strong> {{ product()!._id }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Reviews -->
+      <app-product-reviews [productId]="product()!._id" [deliveredOrders]="deliveredOrders()" />
+
+      <!-- Related Products -->
+      @if (relatedProducts().length > 0) {
+        <section class="related-products">
+          <h2>You May Also Like</h2>
+          <div class="products-grid">
+            @for (product of relatedProducts(); track product._id) {
+              <app-product-card [product]="product" [showAddToCart]="false" />
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Product Reviews -->
+      <app-product-reviews [productId]="product()!._id" [deliveredOrders]="deliveredOrders()" />
+    </div>
+  </div>
+}
+
+@if (!isLoading() && !product()) {
+  <div class="not-found">
+    <h2>Product Not Found</h2>
+    <p>The product you're looking for doesn't exist or has been removed.</p>
+    <a routerLink="/products" class="btn btn-primary">Browse Products</a>
+  </div>
+}

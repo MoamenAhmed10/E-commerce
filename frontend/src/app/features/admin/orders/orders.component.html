@@ -1,0 +1,132 @@
+<div class="admin-orders">
+  <div class="page-header">
+    <h1>Orders</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by order number..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      />
+    </div>
+    <select [(ngModel)]="statusFilter" (change)="loadOrders()">
+      <option value="">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="preparing">Preparing</option>
+      <option value="ready">Ready</option>
+      <option value="shipped">Shipped</option>
+      <option value="received">Received</option>
+      <option value="refused">Refused</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading orders..." />
+  } @else {
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order._id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/admin/orders', order._id]">#{{ order.orderNumber }}</a>
+              </td>
+              <td>
+                <div class="customer-info">
+                  <span class="customer-name">{{ order.customerSnapshot.name }}</span>
+                  <span class="customer-contact">{{
+                    order.customerSnapshot.email || order.customerSnapshot.mobile
+                  }}</span>
+                </div>
+              </td>
+              <td>{{ order.totalItems }}</td>
+              <td>{{ order.subtotal | currency }}</td>
+              <td>
+                <select
+                  class="status-select"
+                  [class]="order.status"
+                  [value]="order.status"
+                  (change)="updateStatus(order, $event)"
+                  [disabled]="['received', 'refused', 'cancelled'].includes(order.status)"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready">Ready</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="received">Received</option>
+                  <option value="refused">Refused</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </td>
+              <td>{{ order.createdAt | date: 'short' }}</td>
+              <td>
+                <a
+                  [routerLink]="['/admin/orders', order._id]"
+                  class="btn-icon"
+                  title="View Details"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty">No orders found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (pagination()) {
+      <app-pagination
+        [currentPage]="pagination()!.page"
+        [totalPages]="pagination()!.totalPages"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</div>

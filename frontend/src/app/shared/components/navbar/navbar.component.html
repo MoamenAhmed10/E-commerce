@@ -1,0 +1,183 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-brand">
+      <span class="brand-name">StyleHub</span>
+    </a>
+
+    <!-- Navigation Links -->
+    <div class="navbar-nav" [class.open]="isMenuOpen">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        Home
+      </a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-link">Shop</a>
+      <a routerLink="/categories" routerLinkActive="active" class="nav-link">Categories</a>
+      <a routerLink="/about" routerLinkActive="active" class="nav-link">About</a>
+      <a routerLink="/contact" routerLinkActive="active" class="nav-link">Contact</a>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="navbar-actions">
+      <!-- Search -->
+      <button class="action-btn" aria-label="Search" (click)="toggleSearch()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </button>
+
+      <!-- Cart -->
+      <a routerLink="/cart" class="action-btn cart-btn" aria-label="Shopping Cart">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="8" cy="21" r="1"></circle>
+          <circle cx="19" cy="21" r="1"></circle>
+          <path
+            d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+          ></path>
+        </svg>
+        @if (cartItemCount() > 0) {
+          <span class="cart-badge">{{ cartItemCount() }}</span>
+        }
+      </a>
+
+      <!-- User Menu -->
+      @if (isLoggedIn()) {
+        <div class="user-menu">
+          <button class="action-btn user-btn" (click)="toggleUserMenu()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </button>
+          @if (isUserMenuOpen) {
+            <div class="dropdown-menu">
+              <div class="dropdown-header">
+                <span class="user-name">{{ userName() }}</span>
+                <span class="user-email">{{ userEmail() }}</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a routerLink="/account" class="dropdown-item" (click)="closeUserMenu()">
+                My Account
+              </a>
+              <a routerLink="/account/orders" class="dropdown-item" (click)="closeUserMenu()">
+                My Orders
+              </a>
+              @if (isAdmin()) {
+                <a routerLink="/admin" class="dropdown-item admin-link" (click)="closeUserMenu()">
+                  Admin Dashboard
+                </a>
+              }
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-btn" (click)="logout()">Logout</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/auth/login" class="btn btn-primary btn-sm">Login</a>
+      }
+
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle menu">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          @if (isMenuOpen) {
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          } @else {
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
+          }
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Dropdown -->
+  @if (isSearchOpen) {
+    <div class="search-dropdown">
+      <div class="search-container">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="Search products..."
+          class="search-input"
+          autofocus
+        />
+        <button class="search-btn" (click)="onSearch()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </button>
+        <button class="close-btn" (click)="toggleSearch()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  }
+</nav>

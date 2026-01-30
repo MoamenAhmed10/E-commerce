@@ -1,0 +1,153 @@
+<div class="category-browse-page">
+  @if (isLoading()) {
+    <app-loading message="Loading categories..." />
+  } @else {
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      @for (crumb of breadcrumbs(); track crumb.link; let last = $last) {
+        @if (!last) {
+          <a [routerLink]="crumb.link">{{ crumb.label }}</a>
+          <span class="separator">/</span>
+        } @else {
+          <span class="current">{{ crumb.label }}</span>
+        }
+      }
+    </nav>
+
+    <div class="page-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <h3>Categories</h3>
+        <ul class="category-list">
+          @for (category of categories(); track category._id) {
+            <li>
+              <button
+                class="category-item"
+                [class.active]="selectedCategorySlug() === category.slug"
+                (click)="selectCategory(category.slug)"
+              >
+                @if (category.image) {
+                  <img [src]="category.image" [alt]="category.name" class="category-icon" />
+                }
+                <span>{{ category.name }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <!-- Subcategories -->
+        @if (subcategories().length > 0) {
+          <div class="subcategory-section">
+            <h4>{{ selectedCategory()?.name }}</h4>
+            <ul class="subcategory-list">
+              <li>
+                <button
+                  class="subcategory-item"
+                  [class.active]="!selectedSubcategorySlug()"
+                  (click)="clearSubcategory()"
+                >
+                  All {{ selectedCategory()?.name }}
+                </button>
+              </li>
+              @for (sub of subcategories(); track sub._id) {
+                <li>
+                  <button
+                    class="subcategory-item"
+                    [class.active]="selectedSubcategorySlug() === sub.slug"
+                    (click)="selectSubcategory(sub.slug)"
+                  >
+                    {{ sub.name }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="content-header">
+          <h1>{{ pageTitle() }}</h1>
+          @if (pagination()) {
+            <span class="product-count">{{ pagination()!.total }} products</span>
+          }
+
+          @if (selectedCategorySlug()) {
+            <select class="sort-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+              <option value="newest">Newest First</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating-high">Rating: High to Low</option>
+              <option value="name-asc">Name: A to Z</option>
+            </select>
+          }
+        </div>
+
+        @if (!selectedCategorySlug()) {
+          <!-- Show category cards when no category selected -->
+          <div class="category-grid">
+            @for (category of categories(); track category._id) {
+              <a class="category-card" [routerLink]="['/categories', category.slug]">
+                <div class="category-image">
+                  @if (category.image) {
+                    <img [src]="category.image" [alt]="category.name" />
+                  } @else {
+                    <div class="placeholder-image">
+                      <span>{{ category.name.charAt(0) }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="category-info">
+                  <h3>{{ category.name }}</h3>
+                  @if (category.description) {
+                    <p>{{ category.description }}</p>
+                  }
+                </div>
+              </a>
+            }
+          </div>
+        } @else {
+          <!-- Show products when category is selected -->
+          @if (isLoadingProducts()) {
+            <div class="loading-products">
+              <app-loading message="Loading products..." />
+            </div>
+          } @else if (products().length === 0) {
+            <div class="no-products">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+              <h3>No products found</h3>
+              <p>Try selecting a different category or subcategory.</p>
+            </div>
+          } @else {
+            <div class="products-grid">
+              @for (product of products(); track product._id) {
+                <app-product-card [product]="product" />
+              }
+            </div>
+
+            <!-- Pagination -->
+            @if (pagination() && pagination()!.totalPages > 1) {
+              <app-pagination
+                [currentPage]="pagination()!.page"
+                [totalPages]="pagination()!.totalPages"
+                (pageChange)="onPageChange($event)"
+              />
+            }
+          }
+        }
+      </main>
+    </div>
+  }
+</div>

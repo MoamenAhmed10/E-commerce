@@ -1,0 +1,196 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Discover Your Unique Style</h1>
+    <p class="hero-subtitle">
+      Explore our curated collection of trendy casual wear for the modern youth
+    </p>
+    <div class="hero-actions">
+      <a routerLink="/products" class="btn btn-primary btn-lg">Shop Now</a>
+      <a routerLink="/products" [queryParams]="{ new: 'true' }" class="btn btn-outline btn-lg"
+        >New Arrivals</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="section categories-section">
+  <div class="container">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+      @for (category of categories(); track category._id) {
+        <a
+          [routerLink]="['/products']"
+          [queryParams]="{ category: category.slug }"
+          class="category-card"
+        >
+          <div class="category-image">
+            <img
+              [src]="category.image || '/assets/images/category-placeholder.jpg'"
+              [alt]="category.name"
+            />
+          </div>
+          <div class="category-info">
+            <h3>{{ category.name }}</h3>
+            <span class="category-link">Shop Now →</span>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Men's Section -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Men's Collection</h2>
+      <a routerLink="/products" [queryParams]="{ gender: 'men' }" class="view-all">View All</a>
+    </div>
+
+    @if (isLoading()) {
+      <app-loading [center]="true" />
+    } @else {
+      <div class="subsection">
+        <h3 class="subsection-title">Best Sellers</h3>
+        <div class="products-grid">
+          @for (product of featuredProducts()?.men?.bestSellers || []; track product._id) {
+            <app-product-card [product]="product" [showAddToCart]="false" />
+          }
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">New Arrivals</h3>
+        <div class="products-grid">
+          @for (product of featuredProducts()?.men?.newArrivals || []; track product._id) {
+            <app-product-card [product]="product" [showAddToCart]="false" />
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Women's Section -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Women's Collection</h2>
+      <a routerLink="/products" [queryParams]="{ gender: 'women' }" class="view-all">View All</a>
+    </div>
+
+    @if (isLoading()) {
+      <app-loading [center]="true" />
+    } @else {
+      <div class="subsection">
+        <h3 class="subsection-title">Best Sellers</h3>
+        <div class="products-grid">
+          @for (product of featuredProducts()?.women?.bestSellers || []; track product._id) {
+            <app-product-card [product]="product" [showAddToCart]="false" />
+          }
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">New Arrivals</h3>
+        <div class="products-grid">
+          @for (product of featuredProducts()?.women?.newArrivals || []; track product._id) {
+            <app-product-card [product]="product" [showAddToCart]="false" />
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<app-testimonials-list />
+
+<!-- Features Section -->
+<section class="section features-section">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <h3>Free Shipping</h3>
+        <p>Free shipping on orders over $50</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <h3>Easy Returns</h3>
+        <p>14-day hassle-free returns</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+            <line x1="1" y1="10" x2="23" y2="10"></line>
+          </svg>
+        </div>
+        <h3>Secure Payment</h3>
+        <p>100% secure checkout</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          </svg>
+        </div>
+        <h3>24/7 Support</h3>
+        <p>Round-the-clock assistance</p>
+      </div>
+    </div>
+  </div>
+</section>

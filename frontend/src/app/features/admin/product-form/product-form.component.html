@@ -1,0 +1,247 @@
+<div class="product-form-page">
+  <div class="page-header">
+    <a routerLink="/admin/products" class="back-link">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+      Back to Products
+    </a>
+    <h1>{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h1>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading..." />
+  } @else {
+    <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+      <div class="form-layout">
+        <div class="form-main">
+          <!-- Basic Info -->
+          <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-group">
+              <label>Product Name *</label>
+              <input type="text" formControlName="name" placeholder="Enter product name" />
+            </div>
+            <div class="form-group">
+              <label>Description *</label>
+              <textarea
+                formControlName="description"
+                rows="4"
+                placeholder="Enter product description"
+              ></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Price (USD) *</label>
+                <input
+                  type="number"
+                  formControlName="price"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div class="form-group">
+                <label>Original Price</label>
+                <input
+                  type="number"
+                  formControlName="originalPrice"
+                  placeholder="Original price before discount"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Stock Quantity</label>
+                <input
+                  type="number"
+                  formControlName="stock"
+                  placeholder="Leave empty for unlimited"
+                  min="0"
+                />
+              </div>
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="isOnSale" />
+                  <span>On Sale</span>
+                </label>
+                <small class="help-text"
+                  >Check this to show the product as on sale with strikethrough original
+                  price</small
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-section">
+            <h2>Category</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Category *</label>
+                <select formControlName="categoryId" (change)="onCategoryChange()">
+                  <option value="">Select Category</option>
+                  @for (category of categories(); track category._id) {
+                    <option [value]="category._id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Subcategory *</label>
+                <select formControlName="subCategoryId">
+                  <option value="">Select Subcategory</option>
+                  @for (sub of subcategories(); track sub._id) {
+                    <option [value]="sub._id">{{ sub.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div class="form-section">
+            <h2>Images</h2>
+
+            <!-- File Upload -->
+            <div class="form-group">
+              <label>Upload Images from Device</label>
+              <div class="file-upload-area">
+                <input
+                  type="file"
+                  #fileInput
+                  (change)="onFilesSelected($event)"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  multiple
+                  class="file-input"
+                />
+                <div class="file-upload-content" (click)="fileInput.click()">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <p>Click to upload or drag and drop</p>
+                  <small>JPEG, PNG, GIF, WebP (max 5MB each)</small>
+                </div>
+              </div>
+              @if (isUploading()) {
+                <div class="upload-progress">
+                  <span>Uploading...</span>
+                </div>
+              }
+            </div>
+
+            <!-- Or URL Input -->
+            <div class="form-group">
+              <label>Or Enter Image URLs (one per line)</label>
+              <textarea
+                formControlName="imagesText"
+                rows="3"
+                placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+              ></textarea>
+            </div>
+
+            <!-- Image Preview -->
+            @if (imagePreview().length > 0) {
+              <div class="image-preview">
+                @for (img of imagePreview(); track img; let i = $index) {
+                  <div class="image-preview-item">
+                    <img [src]="img" alt="Preview" />
+                    <button type="button" class="remove-image" (click)="removeImage(i)">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-sidebar">
+          <!-- Status -->
+          <div class="form-section">
+            <h2>Status</h2>
+            <div class="form-group checkbox">
+              <label>
+                <input type="checkbox" formControlName="isActive" />
+                Active (visible to customers)
+              </label>
+            </div>
+          </div>
+
+          <!-- Product Options -->
+          <div class="form-section">
+            <h2>Options</h2>
+            <div class="form-group">
+              <label>Gender *</label>
+              <select formControlName="gender">
+                <option value="men">Men</option>
+                <option value="women">Women</option>
+                <option value="unisex">Unisex</option>
+              </select>
+            </div>
+            <div class="form-group checkbox">
+              <label>
+                <input type="checkbox" formControlName="isBestSeller" />
+                Best Seller
+              </label>
+            </div>
+            <div class="form-group checkbox">
+              <label>
+                <input type="checkbox" formControlName="isNewArrival" />
+                New Arrival
+              </label>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              [disabled]="isSaving() || productForm.invalid"
+            >
+              @if (isSaving()) {
+                Saving...
+              } @else {
+                {{ isEditMode ? 'Update Product' : 'Create Product' }}
+              }
+            </button>
+            <a routerLink="/admin/products" class="btn btn-outline btn-block">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+</div>

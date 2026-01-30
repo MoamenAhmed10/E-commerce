@@ -1,0 +1,191 @@
+<div class="admin-products">
+  <div class="page-header">
+    <h1>Products</h1>
+    <a routerLink="/admin/products/new" class="btn btn-primary">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12h14" />
+        <path d="M12 5v14" />
+      </svg>
+      Add Product
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      />
+    </div>
+    <select [(ngModel)]="stockFilter" (change)="loadProducts()">
+      <option value="">All Stock</option>
+      <option value="in_stock">In Stock</option>
+      <option value="low_stock">Low Stock</option>
+      <option value="out_of_stock">Out of Stock</option>
+    </select>
+    <select [(ngModel)]="activeFilter" (change)="loadProducts()">
+      <option value="">All Status</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading products..." />
+  } @else {
+    <div class="products-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product._id) {
+            <tr>
+              <td class="product-cell">
+                <img
+                  [src]="product.images[0] || '/assets/images/placeholder.jpg'"
+                  [alt]="product.name"
+                />
+                <div class="product-info">
+                  <span class="product-name">{{ product.name }}</span>
+                  <span class="product-meta">
+                    {{ product.gender | titlecase }}
+                    @if (product.isBestSeller) {
+                      · <span class="badge">Best Seller</span>
+                    }
+                    @if (product.isNewArrival) {
+                      · <span class="badge">New</span>
+                    }
+                  </span>
+                </div>
+              </td>
+              <td>{{ product.price | currency }}</td>
+              <td>
+                <span class="stock-badge" [class]="product.stockStatus">
+                  {{ product.stock ?? '∞' }}
+                </span>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.active]="product.isActive"
+                  [class.inactive]="!product.isActive"
+                >
+                  {{ product.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>{{ product.createdAt | date: 'mediumDate' }}</td>
+              <td class="actions-cell">
+                <a
+                  [routerLink]="['/admin/products', product._id, 'edit']"
+                  class="btn-icon"
+                  title="Edit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </a>
+                <button
+                  class="btn-icon"
+                  (click)="toggleActive(product)"
+                  [title]="product.isActive ? 'Deactivate' : 'Activate'"
+                >
+                  @if (product.isActive) {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  }
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty">No products found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (pagination()) {
+      <app-pagination
+        [currentPage]="pagination()!.page"
+        [totalPages]="pagination()!.totalPages"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</div>

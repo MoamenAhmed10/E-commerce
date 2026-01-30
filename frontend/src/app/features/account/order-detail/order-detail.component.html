@@ -1,0 +1,223 @@
+<div class="order-detail-page">
+  <div class="container">
+    @if (isLoading()) {
+      <app-loading [center]="true" message="Loading order..." />
+    } @else if (!order()) {
+      <div class="error-state">
+        <h2>Order not found</h2>
+        <p>The order you're looking for doesn't exist or you don't have access to it.</p>
+        <a routerLink="/account/orders" class="btn btn-primary">View All Orders</a>
+      </div>
+    } @else {
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-left">
+          <a routerLink="/account/orders" class="back-link">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back to Orders
+          </a>
+          <h1>Order #{{ order()!.orderNumber }}</h1>
+          <p class="order-date">Placed on {{ order()!.createdAt | date: 'fullDate' }}</p>
+        </div>
+        <span class="order-status" [class]="order()!.status.toLowerCase()">
+          {{ order()!.status }}
+        </span>
+      </div>
+
+      <div class="order-layout">
+        <!-- Order Items -->
+        <div class="order-section items-section">
+          <h2>Order Items</h2>
+          <div class="order-items">
+            @for (item of order()!.items; track item.productId) {
+              <div class="order-item">
+                <img
+                  [src]="item.productImage || '/assets/images/placeholder.jpg'"
+                  [alt]="item.productName"
+                />
+                <div class="item-info">
+                  <a [routerLink]="['/products', item.productId]" class="item-name">{{
+                    item.productName
+                  }}</a>
+                  <p class="item-meta">{{ item.price | currency }} × {{ item.quantity }}</p>
+                </div>
+                <span class="item-total">{{ item.total | currency }}</span>
+              </div>
+            }
+          </div>
+          <div class="order-totals">
+            <div class="total-row">
+              <span>Subtotal ({{ order()!.totalItems }} items)</span>
+              <span>{{ order()!.subtotal | currency }}</span>
+            </div>
+            <div class="total-row">
+              <span>Shipping</span>
+              <span>Free</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>Total</span>
+              <span>{{ order()!.subtotal | currency }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="order-sidebar">
+          <!-- Status Timeline -->
+          <div class="order-section">
+            <h2>Order Status</h2>
+            <div class="status-timeline">
+              @for (status of statusTimeline; track status) {
+                <div
+                  class="timeline-item"
+                  [class.active]="isStatusReached(status)"
+                  [class.current]="status === order()!.status"
+                >
+                  <div class="timeline-dot"></div>
+                  <span>{{ status }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Delivery Address -->
+          <div class="order-section">
+            <h2>Delivery Address</h2>
+            <div class="address-info">
+              @if (order()!.addressSnapshot.label) {
+                <p class="label">{{ order()!.addressSnapshot.label }}</p>
+              }
+              <p>{{ order()!.addressSnapshot.building }}, {{ order()!.addressSnapshot.street }}</p>
+              <p>{{ order()!.addressSnapshot.area }}, {{ order()!.addressSnapshot.city }}</p>
+              @if (order()!.addressSnapshot.notes) {
+                <p class="notes">{{ order()!.addressSnapshot.notes }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Customer Info -->
+          <div class="order-section">
+            <h2>Customer</h2>
+            <div class="customer-info">
+              <p>
+                <strong>{{ order()!.customerSnapshot.name }}</strong>
+              </p>
+              @if (order()!.customerSnapshot.email) {
+                <p>{{ order()!.customerSnapshot.email }}</p>
+              }
+              @if (order()!.customerSnapshot.mobile) {
+                <p>{{ order()!.customerSnapshot.mobile }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Order Notes -->
+          @if (order()!.notes) {
+            <div class="order-section">
+              <h2>Order Notes</h2>
+              <p class="order-notes">{{ order()!.notes }}</p>
+            </div>
+          }
+
+          <!-- Actions -->
+          @if (canCancel()) {
+            <div class="order-actions">
+              <button class="btn btn-danger btn-block" (click)="showCancelModal = true">
+                Cancel Order
+              </button>
+            </div>
+          }
+          @if (canRequestReturn()) {
+            <div class="order-actions">
+              <button class="btn btn-outline btn-block" (click)="showReturnModal = true">
+                Request Return
+              </button>
+              <p class="return-notice">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {{ getDaysLeftForReturn() }} days left to request a return
+              </p>
+            </div>
+          }
+          @if (order()!.status === 'received' && !canRequestReturn()) {
+            <div class="order-actions">
+              <p class="return-expired">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                Return period has expired (14 days)
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Cancel Modal -->
+@if (showCancelModal) {
+  <app-confirm-modal
+    [isOpen]="true"
+    title="Cancel Order"
+    message="Are you sure you want to cancel this order? This action cannot be undone."
+    confirmText="Yes, Cancel Order"
+    variant="danger"
+    (confirm)="cancelOrder()"
+    (cancel)="showCancelModal = false"
+  />
+}
+
+<!-- Return Modal -->
+@if (showReturnModal) {
+  <div class="modal-overlay" (click)="showReturnModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Request Return</h3>
+      <p>Please provide a reason for your return request:</p>
+      <textarea
+        #returnReason
+        placeholder="Describe why you want to return this order..."
+        rows="4"
+      ></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="showReturnModal = false">Cancel</button>
+        <button class="btn btn-primary" (click)="submitReturnRequest(returnReason.value)">
+          Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
+}

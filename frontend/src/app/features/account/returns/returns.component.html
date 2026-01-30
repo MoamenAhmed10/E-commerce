@@ -1,0 +1,107 @@
+<div class="returns-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>My Return Requests</h1>
+      <a routerLink="/account/orders" class="btn btn-outline">Back to Orders</a>
+    </div>
+
+    @if (isLoading()) {
+      <app-loading [center]="true" message="Loading returns..." />
+    } @else if (returns().length === 0) {
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M9 14 4 9l5-5" />
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />
+        </svg>
+        <h2>No return requests</h2>
+        <p>You haven't made any return requests yet.</p>
+        <a routerLink="/account/orders" class="btn btn-primary">View Orders</a>
+      </div>
+    } @else {
+      <div class="returns-list">
+        @for (returnReq of returns(); track returnReq._id) {
+          <div class="return-card">
+            <div class="return-header">
+              <div class="return-info">
+                <span class="order-number">Order #{{ getOrderNumber(returnReq) }}</span>
+                <span class="return-date">{{ returnReq.createdAt | date: 'mediumDate' }}</span>
+              </div>
+              <span class="status-badge" [class]="returnReq.status">
+                {{ getStatusLabel(returnReq.status) }}
+              </span>
+            </div>
+            <div class="return-body">
+              <p class="return-reason"><strong>Reason:</strong> {{ returnReq.reason }}</p>
+              @if (returnReq.adminNotes) {
+                <div class="admin-response">
+                  <strong>Admin Response:</strong>
+                  <p>{{ returnReq.adminNotes }}</p>
+                </div>
+              }
+            </div>
+            <div class="return-footer">
+              @if (returnReq.status === 'approved') {
+                <p class="status-message success">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  Your return has been approved! Please ship the items back.
+                </p>
+              } @else if (returnReq.status === 'rejected') {
+                <p class="status-message error">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                  Your return request has been rejected.
+                </p>
+              } @else {
+                <p class="status-message pending">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Your return request is being reviewed.
+                </p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

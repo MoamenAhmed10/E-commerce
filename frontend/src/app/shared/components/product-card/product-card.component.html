@@ -1,0 +1,55 @@
+<article class="product-card" [class.out-of-stock]="!product.inStock">
+  <a [routerLink]="['/products', product.slug]" class="product-image-link">
+    <div class="product-image-container">
+      <img [src]="mainImage" [alt]="product.name" class="product-image" loading="lazy" />
+      @if (product.isOnSale && product.discountPercentage) {
+        <span class="sale-badge">-{{ product.discountPercentage }}%</span>
+      }
+      @if (product.isBestSeller) {
+        <span class="bestseller-badge">Best Seller</span>
+      }
+      @if (product.isNewArrival && !product.isOnSale) {
+        <span class="new-badge">New</span>
+      }
+      @if (!product.inStock) {
+        <div class="out-of-stock-overlay">
+          <span>Out of Stock</span>
+        </div>
+      }
+    </div>
+  </a>
+
+  <div class="product-info">
+    <a [routerLink]="['/products', product.slug]" class="product-name">
+      {{ product.name }}
+    </a>
+
+    @if (getCategoryName()) {
+      <span class="product-category">{{ getCategoryName() }}</span>
+    }
+
+    <div class="product-price">
+      @if (product.isOnSale && product.originalPrice) {
+        <span class="original-price">{{ product.originalPrice | currency }}</span>
+        <span class="sale-price">{{ product.price | currency }}</span>
+      } @else {
+        <span class="current-price">{{ product.price | currency }}</span>
+      }
+    </div>
+
+    @if (product.stockStatus === 'low_stock') {
+      <span class="low-stock-warning">Only a few left!</span>
+    }
+
+    @if (showAddToCart && product.inStock) {
+      <button class="add-to-cart-btn" (click)="onAddToCart($event)" [disabled]="isAddingToCart">
+        @if (isAddingToCart) {
+          <span class="spinner"></span>
+          Adding...
+        } @else {
+          Add to Cart
+        }
+      </button>
+    }
+  </div>
+</article>

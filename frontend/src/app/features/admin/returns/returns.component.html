@@ -1,0 +1,93 @@
+<div class="admin-returns">
+  <div class="page-header">
+    <h1>Return Requests</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select [(ngModel)]="statusFilter" (change)="loadReturns()">
+      <option value="">All Status</option>
+      <option value="requested">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading [center]="true" message="Loading returns..." />
+  } @else {
+    <div class="returns-list">
+      @for (returnReq of returns(); track returnReq._id) {
+        <div class="return-card" [class]="returnReq.status.toLowerCase()">
+          <div class="return-header">
+            <div class="return-info">
+              <span class="order-number">Order #{{ getOrderNumber(returnReq) }}</span>
+              <span class="return-date">{{ returnReq.createdAt | date: 'mediumDate' }}</span>
+            </div>
+            <span class="status-badge" [class]="returnReq.status.toLowerCase()">
+              {{ returnReq.status }}
+            </span>
+          </div>
+          <div class="return-body">
+            <p class="return-reason"><strong>Reason:</strong> {{ returnReq.reason }}</p>
+            @if (returnReq.adminNotes) {
+              <p class="admin-notes"><strong>Admin Notes:</strong> {{ returnReq.adminNotes }}</p>
+            }
+          </div>
+          @if (returnReq.status === 'requested') {
+            <div class="return-actions">
+              <div class="notes-input">
+                <input type="text" placeholder="Admin notes (optional)" #notesInput />
+              </div>
+              <button class="btn btn-success" (click)="approveReturn(returnReq, notesInput.value)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Approve
+              </button>
+              <button class="btn btn-danger" (click)="rejectReturn(returnReq, notesInput.value)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                Reject
+              </button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <p>No return requests found</p>
+        </div>
+      }
+    </div>
+
+    @if (pagination()) {
+      <app-pagination
+        [currentPage]="pagination()!.page"
+        [totalPages]="pagination()!.totalPages"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</div>

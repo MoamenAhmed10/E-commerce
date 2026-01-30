@@ -1,0 +1,48 @@
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What Our Customers Say</h2>
+      @if (isLoggedIn) {
+        <a routerLink="/account/testimonials" class="write-review-btn"> Write Your Review </a>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+      </div>
+    } @else if (testimonials().length === 0) {
+      <div class="empty-state">
+        <p>No testimonials yet. Be the first to share your experience!</p>
+        @if (isLoggedIn) {
+          <a routerLink="/account/testimonials" class="btn btn-primary"> Share Your Experience </a>
+        }
+      </div>
+    } @else {
+      <div class="testimonials-grid">
+        @for (testimonial of testimonials(); track testimonial._id) {
+          <div class="testimonial-card">
+            <div class="testimonial-header">
+              <div class="user-avatar">
+                {{ testimonial.userName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="user-info">
+                <h4 class="user-name">{{ testimonial.userName }}</h4>
+                <div class="rating">
+                  @for (star of getStars(testimonial.rating); track $index) {
+                    <span class="star" [class.filled]="star === 1">★</span>
+                  }
+                </div>
+              </div>
+            </div>
+            <h5 class="testimonial-title">{{ testimonial.title }}</h5>
+            <p class="testimonial-content">{{ testimonial.content }}</p>
+            <span class="testimonial-date">
+              {{ testimonial.createdAt | date: 'mediumDate' }}
+            </span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
